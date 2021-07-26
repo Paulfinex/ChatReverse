@@ -101,6 +101,7 @@ namespace ChatReverse
             int currLine = 1;
             int totLines = 1;
             // Count iterations for all files and directories, adding to the totLines for the prog_bar
+            lbl_perc.Invoke((MethodInvoker)delegate { lbl_curr_op.Text = "Calcolo iterazioni.."; });
             foreach (string s in Directory.GetDirectories(input_path, "*", SearchOption.AllDirectories))
             {
                 totLines += 1;
@@ -113,10 +114,20 @@ namespace ChatReverse
             {
                 if (s.Contains("message_"))
                 {
-                    totLines += 1;
+                    if (check_paths.Checked)
+                    {
+
+                        totLines += 2;
+                    }
+                    else
+                    {
+                        totLines += 1;
+
+                    }
                 }
             }
             //Copy source dir structure to destination
+            lbl_perc.Invoke((MethodInvoker)delegate { lbl_curr_op.Text = "Copia struttura cartelle.."; });
             foreach (string dirPath in Directory.GetDirectories(input_path, "*", SearchOption.AllDirectories))
             {
 
@@ -124,6 +135,7 @@ namespace ChatReverse
                 worker_reverse.ReportProgress(currLine++ * 100 / totLines);
             }
             //Copy source File structure to destination
+            lbl_perc.Invoke((MethodInvoker)delegate { lbl_curr_op.Text = "Copia struttura file.."; });
             foreach (string newPath in Directory.GetFiles(input_path, "*.*", SearchOption.AllDirectories))
             {
                 File.Copy(newPath, newPath.Replace(input_path, output_path), true);
@@ -131,13 +143,51 @@ namespace ChatReverse
             }
             //Modify HTML files in destination dir
             string[] htmlFiles = Directory.GetFiles(output_path, "*.html", SearchOption.AllDirectories);
+            //var originalmediapath= Directory.EnumerateFiles(output_path, "*.*", SearchOption.AllDirectories).Where(s => s.EndsWith(".mp3") || s.EndsWith(".jpg");
+            var destinationmediapath = Directory.EnumerateFiles(output_path, "*.*", SearchOption.AllDirectories).Where(s => s.EndsWith(".mp4") || s.EndsWith(".png") || s.EndsWith(".gif") || s.EndsWith(".avi") || s.EndsWith(".jpg") || s.EndsWith(".mp3"));
+            int currFileCounter = 1;
+
+            int totMediaFiles = destinationmediapath.Count();
             foreach (string s in htmlFiles)
             {
+                
+                   
+               
                 if (s.Contains("message_"))
                 {
+                    
                     try
                     {
                         string readText = File.ReadAllText(s);
+
+
+                        if (check_paths.Checked)
+                        {
+                            string rebuildText = "";
+                            foreach (string dp in destinationmediapath)
+                            {
+                                
+                                string[] splitText = readText.Split('"');
+                                rebuildText = "";
+                                foreach (string split in splitText)
+                                {
+                                    if (split.Contains(Path.GetFileName(dp)))
+                                    {
+                                        lbl_perc.Invoke((MethodInvoker)delegate { lbl_curr_op.Text = "Cambio Referenze Media: " + currFileCounter + "/" + totMediaFiles.ToString(); });
+
+                                        currFileCounter++;
+                                        rebuildText += dp + "\"";
+                                    }
+                                    else
+                                    {
+                                        rebuildText += split + "\"";
+                                    }
+                                }
+                                readText = rebuildText;
+                            }
+                            worker_reverse.ReportProgress(currLine++ * 100 / totLines);
+                        }
+                        lbl_perc.Invoke((MethodInvoker)delegate { lbl_curr_op.Text = "Inversione chat.."; });
                         readText = readText.Replace("._4t5n{", "._4t5n{display:flex;flex-direction:column-reverse;");
                         File.WriteAllText(s, string.Empty);
                         File.WriteAllText(s, readText);
@@ -176,6 +226,41 @@ namespace ChatReverse
 
         }
 
+        private List<string> relativePath(string[] paths)
+        {
+            List<string> relpath = new List<string>();
 
+            foreach (string s in paths)
+            { 
+                string[] temp = s.Split('\\');
+                string strbuilder = "";
+                string formatstr = "";
+                foreach (string s2 in temp)
+                {
+                    if (s2 != "messages")
+                    {
+                        strbuilder += s2 + @"\";
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                formatstr = s.Replace(strbuilder, "");
+                relpath.Add(formatstr);
+            }
+
+            return relpath;
+        
+        }
+
+        private void check_paths_CheckedChanged(object sender, EventArgs e)
+        {
+            if(check_paths.Checked)
+            {
+                MessageBox.Show("Mantenere i media per le chat aumenterà notevolmente il tempo di esecuzione.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            }
+        }
     }
 }

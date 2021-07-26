@@ -39,6 +39,8 @@ namespace ChatReverse
             this.lbl_perc = new System.Windows.Forms.Label();
             this.txt_input_path = new System.Windows.Forms.TextBox();
             this.txt_output_path = new System.Windows.Forms.TextBox();
+            this.check_paths = new System.Windows.Forms.CheckBox();
+            this.lbl_curr_op = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btn_select_input_path
@@ -53,7 +55,7 @@ namespace ChatReverse
             // 
             // btn_revert
             // 
-            this.btn_revert.Location = new System.Drawing.Point(10, 83);
+            this.btn_revert.Location = new System.Drawing.Point(12, 109);
             this.btn_revert.Name = "btn_revert";
             this.btn_revert.Size = new System.Drawing.Size(117, 23);
             this.btn_revert.TabIndex = 5;
@@ -80,7 +82,7 @@ namespace ChatReverse
             // 
             // prog_bar_reverse
             // 
-            this.prog_bar_reverse.Location = new System.Drawing.Point(133, 83);
+            this.prog_bar_reverse.Location = new System.Drawing.Point(135, 109);
             this.prog_bar_reverse.Name = "prog_bar_reverse";
             this.prog_bar_reverse.Size = new System.Drawing.Size(186, 23);
             this.prog_bar_reverse.TabIndex = 8;
@@ -88,10 +90,11 @@ namespace ChatReverse
             // lbl_perc
             // 
             this.lbl_perc.AutoSize = true;
-            this.lbl_perc.Location = new System.Drawing.Point(142, 110);
+            this.lbl_perc.Location = new System.Drawing.Point(132, 135);
             this.lbl_perc.Name = "lbl_perc";
-            this.lbl_perc.Size = new System.Drawing.Size(0, 13);
+            this.lbl_perc.Size = new System.Drawing.Size(33, 13);
             this.lbl_perc.TabIndex = 9;
+            this.lbl_perc.Text = "100%";
             // 
             // txt_input_path
             // 
@@ -112,11 +115,33 @@ namespace ChatReverse
             this.txt_output_path.Size = new System.Drawing.Size(272, 19);
             this.txt_output_path.TabIndex = 11;
             // 
+            // check_paths
+            // 
+            this.check_paths.AutoSize = true;
+            this.check_paths.Location = new System.Drawing.Point(13, 86);
+            this.check_paths.Name = "check_paths";
+            this.check_paths.Size = new System.Drawing.Size(147, 17);
+            this.check_paths.TabIndex = 12;
+            this.check_paths.Text = "Mantieni Media nella chat";
+            this.check_paths.UseVisualStyleBackColor = true;
+            this.check_paths.CheckedChanged += new System.EventHandler(this.check_paths_CheckedChanged);
+            // 
+            // lbl_curr_op
+            // 
+            this.lbl_curr_op.AutoSize = true;
+            this.lbl_curr_op.Location = new System.Drawing.Point(172, 135);
+            this.lbl_curr_op.Name = "lbl_curr_op";
+            this.lbl_curr_op.Size = new System.Drawing.Size(35, 13);
+            this.lbl_curr_op.TabIndex = 13;
+            this.lbl_curr_op.Text = "label1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(430, 150);
+            this.ClientSize = new System.Drawing.Size(430, 204);
+            this.Controls.Add(this.lbl_curr_op);
+            this.Controls.Add(this.check_paths);
             this.Controls.Add(this.txt_output_path);
             this.Controls.Add(this.txt_input_path);
             this.Controls.Add(this.lbl_perc);
@@ -142,6 +167,8 @@ namespace ChatReverse
         private System.Windows.Forms.Label lbl_perc;
         private System.Windows.Forms.TextBox txt_input_path;
         private System.Windows.Forms.TextBox txt_output_path;
+        private System.Windows.Forms.CheckBox check_paths;
+        private System.Windows.Forms.Label lbl_curr_op;
     }
 }
 
