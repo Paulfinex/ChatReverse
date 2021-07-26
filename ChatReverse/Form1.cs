@@ -18,13 +18,11 @@ namespace ChatReverse
 
         string input_path = "";
         string output_path = "";
-        List<string> lista_piattaforme = new List<string>() {"","Instagram" };
         public Form1()
         {
             InitializeComponent();
             prog_bar_reverse.Visible = false;
             lbl_perc.Text = "";
-            //combo_piattaforma.DataSource = lista_piattaforme;
         }
 
         private void btn_select_input_path_Click(object sender, EventArgs e)
@@ -32,25 +30,30 @@ namespace ChatReverse
             dialog_input_fldr.ShowDialog();
             input_path = dialog_input_fldr.SelectedPath;
             txt_input_path.AppendText(dialog_input_fldr.SelectedPath);
-
-
         }
 
         private void btn_select_output_path_Click(object sender, EventArgs e)
         {
-             
-                dialog_output_fldr.ShowDialog();
-                string[] files = Directory.GetFiles(dialog_output_fldr.SelectedPath, "*.*", SearchOption.AllDirectories);
+            dialog_output_fldr.ShowDialog();
+            string[] files;
+            try 
+            {
+                 files = Directory.GetFiles(dialog_output_fldr.SelectedPath, "*.*", SearchOption.AllDirectories);
+            }
+            catch(Exception getFileEX)
+            {
+                MessageBox.Show(getFileEX.Message);
+                return;
+            }
             if (files.Length > 0)
             {
-                DialogResult dialogResult = MessageBox.Show("La cartella di destinazione selezionata contiene già dei file, continuare comunque?", "Struttura cartella già esistente", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
+                DialogResult dialogResult = MessageBox.Show("La cartella di destinazione selezionata contiene già dei file, continuare comunque?", "Struttura cartella già esistente", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (dialogResult == DialogResult.Yes)
                 {
 
                     output_path = dialog_output_fldr.SelectedPath;
                     txt_output_path.AppendText(dialog_output_fldr.SelectedPath);
                 }
-
                 if (dialogResult == DialogResult.No)
                 {
                     return;
@@ -61,21 +64,35 @@ namespace ChatReverse
                 output_path = dialog_output_fldr.SelectedPath;
                 txt_output_path.AppendText(dialog_output_fldr.SelectedPath);
             }
-            
         }
 
         private void btn_revert_Click(object sender, EventArgs e)
         {
-            if (txt_input_path.Text == "" || txt_output_path.Text == "")
+            string[] files;
+            try
             {
-                MessageBox.Show("Selezionare entrambi i percorsi prima di procedere.");
+                files = Directory.GetFiles(input_path, "*.*", SearchOption.AllDirectories);
+            }
+            catch (Exception getFileEX)
+            {
+                MessageBox.Show(getFileEX.Message);
                 return;
             }
-            if(!worker_reverse.IsBusy)
+            if (txt_input_path.Text == "" || txt_output_path.Text == "")
+            {
+                MessageBox.Show("Selezionare entrambi i percorsi prima di procedere.", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (files.Length==0)
+            {
+                MessageBox.Show("Non sono presenti file da modificare nella cartella Origine selezionata.","Errore",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            } 
+            
+            if (!worker_reverse.IsBusy)
             {
                 prog_bar_reverse.Visible = true;
                 worker_reverse.RunWorkerAsync();
-
             }
         }
 
@@ -83,6 +100,7 @@ namespace ChatReverse
         {
             int currLine = 1;
             int totLines = 1;
+            // Count iterations for all files and directories, adding to the totLines for the prog_bar
             foreach (string s in Directory.GetDirectories(input_path, "*", SearchOption.AllDirectories))
             {
                 totLines += 1;
@@ -98,25 +116,20 @@ namespace ChatReverse
                     totLines += 1;
                 }
             }
-
-            //Now Create all of the directories
+            //Copy source dir structure to destination
             foreach (string dirPath in Directory.GetDirectories(input_path, "*", SearchOption.AllDirectories))
             {
-                
-                Directory.CreateDirectory(dirPath.Replace(input_path, output_path));
 
+                Directory.CreateDirectory(dirPath.Replace(input_path, output_path));
                 worker_reverse.ReportProgress(currLine++ * 100 / totLines);
             }
-
-            //Copy all the files & Replaces any files with the same name
+            //Copy source File structure to destination
             foreach (string newPath in Directory.GetFiles(input_path, "*.*", SearchOption.AllDirectories))
             {
                 File.Copy(newPath, newPath.Replace(input_path, output_path), true);
-
                 worker_reverse.ReportProgress(currLine++ * 100 / totLines);
             }
-
-
+            //Modify HTML files in destination dir
             string[] htmlFiles = Directory.GetFiles(output_path, "*.html", SearchOption.AllDirectories);
             foreach (string s in htmlFiles)
             {
@@ -129,12 +142,11 @@ namespace ChatReverse
                         File.WriteAllText(s, string.Empty);
                         File.WriteAllText(s, readText);
                     }
-                    catch(Exception Read_Write_exception)
+                    catch (Exception Read_Write_exception)
                     {
-                        MessageBox.Show("Errore nella modifica dei file HTML: " + Environment.NewLine + Read_Write_exception);
+                        MessageBox.Show("Errore nella modifica dei file HTML: " + Environment.NewLine + Read_Write_exception.Message);
 
                     }
-
                     worker_reverse.ReportProgress(currLine++ * 100 / totLines);
                 }
             }
@@ -161,9 +173,9 @@ namespace ChatReverse
 
         private static void CopyFilesRecursively(string sourcePath, string targetPath)
         {
-            
+
         }
 
-    
+
     }
 }
